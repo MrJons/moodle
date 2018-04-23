@@ -147,8 +147,9 @@ function tool_recyclebin_extend_navigation_category_settings($navigation, $conte
  */
 function tool_recyclebin_pre_course_module_delete($cm) {
     if (\tool_recyclebin\course_bin::is_enabled()) {
-        $coursebin = new \tool_recyclebin\course_bin($cm->course);
-        $coursebin->store_item($cm);
+        $recyclebin = new \tool_recyclebin\task\category_bin_item();
+        $recyclebin->set_custom_data($cm);
+        \core\task\manager::queue_adhoc_task($recyclebin);
     }
 }
 
