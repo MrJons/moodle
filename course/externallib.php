@@ -2026,7 +2026,7 @@ class core_course_external extends external_api {
                 self::validate_context($context);
                 // Add to the array.
                 $arrcourseschecked[] = $cm->course;
-            }
+            }tformat_string
 
             // Ensure they can delete this module.
             $modcontext = context_module::instance($cm->id);

@@ -562,8 +562,7 @@ class course_modinfo {
 
         // Get section data
         $sections = $DB->get_records('course_sections', array('course' => $course->id), 'section',
-                'section, id, course, name, summary, summaryformat, sequence, visible, ' .
-                'availability');
+                'section, id, course, name, summary, summaryformat, sequence, visible, availability');
         $compressedsections = array();
 
         $formatoptionsdef = course_get_format($course)->section_format_options();
@@ -761,6 +760,7 @@ class course_modinfo {
  * @property-read mixed $customdata Optional custom data stored in modinfo cache for this activity, or null if none
  * @property-read string $afterlink Extra HTML code to display after link - calculated on request
  * @property-read string $afterediticons Extra HTML code to display after editing icons (e.g. more icons) - calculated on request
+ * @property-read bool $deletioninprogress True if this course module is scheduled for deletion, false otherwise.
  */
 class cm_info implements IteratorAggregate {
     /**
@@ -1047,6 +1047,11 @@ class cm_info implements IteratorAggregate {
     private $afterediticons;
 
     /**
+     * @var bool representing the deletion state of the module. True if the mod is scheduled for deletion.
+     */
+    private $deletioninprogress;
+
+    /**
      * List of class read-only properties and their getter methods.
      * Used by magic functions __get(), __isset(), __empty()
      * @var array
@@ -1097,6 +1102,7 @@ class cm_info implements IteratorAggregate {
         'uservisible' => 'get_user_visible',
         'visible' => false,
         'visibleold' => false,
+        'deletioninprogress' => false
     );
 
     /**
@@ -1520,7 +1526,7 @@ class cm_info implements IteratorAggregate {
         static $cmfields = array('id', 'course', 'module', 'instance', 'section', 'idnumber', 'added',
             'score', 'indent', 'visible', 'visibleold', 'groupmode', 'groupingid',
             'completion', 'completiongradeitemnumber', 'completionview', 'completionexpected',
-            'showdescription', 'availability');
+            'showdescription', 'availability', 'deletioninprogress');
         foreach ($cmfields as $key) {
             $cmrecord->$key = $this->$key;
         }
@@ -1715,6 +1721,7 @@ class cm_info implements IteratorAggregate {
         $this->added = isset($mod->added) ? $mod->added : 0;
         $this->score = isset($mod->score) ? $mod->score : 0;
         $this->visibleold = isset($mod->visibleold) ? $mod->visibleold : 0;
+        $this->deletioninprogress = isset($mod->deletioninprogress) ? $mod->deletioninprogress : 0;
 
         // Note: it saves effort and database space to always include the
         // availability and completion fields, even if availability or completion
@@ -1878,6 +1885,12 @@ class cm_info implements IteratorAggregate {
             return null;
         }
         $this->uservisible = true;
+
+        // If the module is being deleted, set the uservisible state to false and return.
+        if ($this->deletioninprogress) {
+            $this->uservisible = false;
+            return null;
+        }
 
         // If the user cannot access the activity set the uservisible flag to false.
         // Additional checks are required to determine whether the activity is entirely hidden or just greyed out.
@@ -2489,7 +2502,7 @@ class section_info implements IteratorAggregate {
         'summary' => '',
         'summaryformat' => '1', // FORMAT_HTML, but must be a string
         'visible' => '1',
-        'availability' => null,
+        'availability' => null
     );
 
     /**

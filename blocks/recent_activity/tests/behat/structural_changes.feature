@@ -187,6 +187,7 @@ Feature: View structural changes in recent activity block
     And I follow "Course 1"
     And I turn editing mode on
     And I delete "ForumUpdated" activity
+    And I run all adhoc tasks
     And I log out
     # Students 1 and 2 see that forum was deleted
     And I log in as "student1"
