@@ -575,6 +575,10 @@ class core_course_courselib_testcase extends advanced_testcase {
         $sectioncreated = $DB->record_exists('course_sections', array('course' => $created->id, 'section' => 0));
         $this->assertTrue($sectioncreated);
 
+        // Ensure blocks have been associated to the course.
+        $blockcount = $DB->count_records('block_instances', array('parentcontextid' => $context->id));
+        $this->assertGreaterThan(0, $blockcount);
+
         // Ensure that the shortname isn't duplicated.
         try {
             $created = create_course($course);

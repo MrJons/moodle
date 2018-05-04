@@ -115,7 +115,7 @@ abstract class base_logger implements checksumable {
     public final function process($message, $level, $options = null) {
         $result = true;
         if ($this->level != backup::LOG_NONE && $this->level >= $level
-            && !(defined('BEHAT_TEST') && BEHAT_TEST)) { // Perform action conditionally.
+                && !(defined('BEHAT_TEST') && BEHAT_TEST)) { // Perform action conditionally.
             $result = $this->action($message, $level, $options);
         }
         if ($result === false) { // Something was wrong, stop the chain
